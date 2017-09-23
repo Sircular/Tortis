@@ -10,6 +10,8 @@
 #include <sys/select.h>
 #include <sys/time.h>
 
+#include "board.h"
+
 /* Redraws hello world on the screen */
 void redraw(void);
 
