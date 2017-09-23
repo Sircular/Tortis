@@ -9,12 +9,6 @@
 
 #define BLOCKS_PER_PIECE 4
 
-/* Piece struct. */
-typedef struct Piece {
-    Coordinate pos;
-    Coordinate blocks[BLOCKS_PER_PIECE];
-} Piece;
-
 /* Piece types enum. */
 #define PIECE_TYPES_COUNT 6
 enum PieceType {
@@ -23,8 +17,16 @@ enum PieceType {
     L_ZIGZAG,
     R_ZIGZAG,
     T_PIECE,
-    LONG_PIECE
+    LONG_PIECE,
+    NONE_PIECE
 };
+
+/* Piece struct. */
+typedef struct Piece {
+    enum PieceType type;
+    Coordinate pos;
+    Coordinate blocks[BLOCKS_PER_PIECE];
+} Piece;
 
 /* Initializes a piece (by filling its blocks.) Assumes that the memory is
  * already allocated.*/

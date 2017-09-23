@@ -47,6 +47,9 @@ bool piece_init(Piece* piecePtr, enum PieceType type) {
     if (piecePtr == NULL) {
         return false;
     }
+    piecePtr->type = type;
+    piecePtr->pos.x = 0;
+    piecePtr->pos.y = 0;
     int i;
     for (i = 0; i < BLOCKS_PER_PIECE; i++) {
         piecePtr->blocks[i] = PIECES[type][i];
