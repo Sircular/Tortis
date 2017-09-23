@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdbool.h>
+#include <curses.h>
 
 #include "board.h"
 
@@ -42,5 +43,20 @@ bool board_setPiece(Board* boardPtr, Piece piece) {
         }
     }
     // it's valid
+    return true;
+}
+
+bool board_draw(Board* boardPtr, WINDOW* winPtr) {
+    if (boardPtr == NULL || winPtr == NULL) {
+        return false;
+    }
+    int x;
+    for (x = 0; x < boardPtr->width; x++) {
+        int y;
+        for (y = 0; y < boardPtr->height; y++) {
+            int i = COORD_INDEX(boardPtr, x, y);
+            // TODO: drawing with colors
+        }
+    }
     return true;
 }
