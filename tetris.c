@@ -12,49 +12,40 @@
 
 #include "board.h"
 
-/* Redraws hello world on the screen */
-void redraw(void);
+#define BOARD_WIDTH 10
+#define BOARD_HEIGHT 20
 
-static int i;
+static Board* board;
+
+static WINDOW* gameWin;
+static WINDOW* boardWin;
 
 int main() {
     initscr();
     raw();
     noecho();
-    nodelay(stdscr, true);
+    //nodelay(stdscr, true);
+    refresh();
 
-    // set up stuff for select
-    fd_set in, tmp_in;
-    struct timeval time;
-
-    FD_ZERO(&in);
-    FD_SET(0, &in);
-    time.tv_sec = 0;
-    time.tv_usec = 999999; // must be less than 1E+06
-
-    i = 0;
-    bool running = true;
-    redraw();
-    while (running) {
-        tmp_in = in;
-        int sel_ret = select(FD_SETSIZE, &tmp_in, NULL, NULL, &time);
-        if (sel_ret == 0) { // timeout
-            time.tv_sec = 0;
-            time.tv_usec = 999999; // must be less than 1E+06
-            redraw();
-        } else { // keypress
-            if (getch() == 10) {
-                running = false;
-            }
-        }
+    {
+        int boardWinWidth = (BOARD_WIDTH*2) + 2;
+        int winHeight = BOARD_HEIGHT+2;
+        int totalWidth = boardWinWidth+BOARD_WIDTH;
+        board = board_init(BOARD_WIDTH, BOARD_HEIGHT);
+        gameWin = newwin(winHeight, totalWidth, 0, 0);
+        boardWin = derwin(gameWin, winHeight, boardWinWidth, 0, 0);
     }
 
+    int i;
+    for (i = 0; i < BOARD_WIDTH; i++) {
+        board->board[COORD_INDEX(board, i, BOARD_HEIGHT-1)] = 1;
+    }
+    board_draw(board, boardWin);
+    wrefresh(gameWin);
+    refresh();
+    getch();
+
+    board_free(board);
     endwin();
     return 0;
-}
-
-void redraw() {
-    mvprintw(i, i, "Hello world!");
-    refresh();
-    i++;
 }
