@@ -5,6 +5,8 @@
 #ifndef TETRIS_PIECE
 #define TETRIS_PIECE
 
+#include <stdbool.h>
+
 #include "coordinate.h"
 
 #define BLOCKS_PER_PIECE 4
