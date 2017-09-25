@@ -48,17 +48,24 @@ bool board_setPiece(Board* boardPtr, Piece piece) {
     return true;
 }
 
-bool board_draw(Board* boardPtr, WINDOW* winPtr) {
-    if (boardPtr == NULL || winPtr == NULL) {
+bool board_draw(Board* boardPtr, WINDOW* subWin) {
+    if (boardPtr == NULL || subWin == NULL) {
         return false;
     }
+    box(subWin, 0, 0);
     int x;
     for (x = 0; x < boardPtr->width; x++) {
         int y;
         for (y = 0; y < boardPtr->height; y++) {
             int i = COORD_INDEX(boardPtr, x, y);
             // TODO: drawing with colors
+            if (boardPtr->board[i] > 0) {
+                mvwprintw(subWin, y+1, (x*2)+1, "XX");
+            } else {
+                mvwprintw(subWin, y+1, (x*2)+1, "  ");
+            }
         }
     }
+    touchwin(subWin);
     return true;
 }

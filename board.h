@@ -20,7 +20,7 @@ typedef struct Board {
 } Board;
 
 /* Gets the index from the x and y coordinates based on width. */
-#define COORD_INDEX(board, x, y) x + (board->width * y)
+#define COORD_INDEX(board, x, y) (x) + (board->width * (y))
 
 /* Initializes a board of the specified dimensions. Returns true on success. */
 Board* board_init(int width, int height);
@@ -34,5 +34,5 @@ bool board_setPiece(Board* boardPtr, Piece piece);
 
 /* Draws the board on the specified window at (0,0). Returns true on success.
  * */
-bool board_draw(Board* boardPtr, WINDOW* winPtr);
+bool board_draw(Board* boardPtr, WINDOW* subWin);
 #endif
