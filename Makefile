@@ -1,5 +1,5 @@
 CC=clang
-CFLAGS=-Weverything
+CFLAGS=-Weverything -Wno-padded
 LIBS=-lncurses
 BIN=tetris
 
