@@ -4,6 +4,10 @@
 
 #include "board.h"
 
+/* Returns if a piece in a particular position or rotation is valid on the
+ * given board. */
+bool isPieceValid(Board* board, Piece piece);
+
 Board* board_init(int width, int height) {
     Board* boardPtr = malloc(sizeof(Board));
     if (boardPtr == NULL) {
@@ -16,6 +20,7 @@ Board* board_init(int width, int height) {
         free(boardPtr);
         return NULL;
     }
+    boardPtr->piece = NULL;
     return boardPtr;
 }
 
@@ -28,29 +33,48 @@ void board_free(Board* boardPtr) {
     }
 }
 
-bool board_setPiece(Board* boardPtr, Piece piece) {
+void board_setPiece(Board* boardPtr, enum PieceType type) {
     if (boardPtr == NULL) {
+        return;
+    }
+    if (boardPtr->piece == NULL) {
+        boardPtr->piece = malloc(sizeof(Piece));
+        piece_init(boardPtr->piece, type);
+    }
+    
+}
+
+bool board_movePiece(Board* boardPtr, int x, int y) {
+    if (boardPtr == NULL || boardPtr->piece == NULL) {
         return false;
     }
-    Piece oldPiece = boardPtr->piece; // for safekeeping later
-    boardPtr->piece = piece;
-    if (piece.type != NONE_PIECE) {
-        int i;
-        for (i = 0; i < BLOCKS_PER_PIECE; i++) {
-            Coordinate c = coordinate_add(piece.pos, piece.blocks[i]);
-            if (boardPtr->board[COORD_INDEX(boardPtr, c.x, c.y)] > 0) {
-                boardPtr->piece = oldPiece;
-                return false;
-            }
-        }
+    Piece newPiece = *(boardPtr->piece);
+    Coordinate offset = COORDINATE(x, y);
+    newPiece.pos = coordinate_add(newPiece.pos, offset);
+    if (!isPieceValid(boardPtr, newPiece)) {
+        return false;
     }
-    // it's valid
+    // it's valid, so save it
+    *(boardPtr->piece) = newPiece;
     return true;
 }
 
-bool board_draw(Board* boardPtr, WINDOW* subWin) {
-    if (boardPtr == NULL || subWin == NULL) {
+bool board_rotatePiece(Board* boardPtr, bool counter) {
+    if (boardPtr == NULL || boardPtr->piece == NULL) {
         return false;
+    }
+    Piece newPiece = *(boardPtr->piece);
+    piece_rotate(&newPiece, counter);
+    if (isPieceValid(boardPtr, newPiece)) {
+        return false;
+    }
+    *(boardPtr->piece) = newPiece;
+    return true;
+}
+
+void board_draw(Board* boardPtr, WINDOW* subWin) {
+    if (boardPtr == NULL || subWin == NULL) {
+        return;
     }
     box(subWin, 0, 0);
     int x;
@@ -67,5 +91,21 @@ bool board_draw(Board* boardPtr, WINDOW* subWin) {
         }
     }
     touchwin(subWin);
+}
+
+bool isPieceValid(Board* boardPtr, Piece piece) {
+    int i;
+    for (i = 0; i < BLOCKS_PER_PIECE; i++) {
+        Coordinate c = coordinate_add(piece.pos, piece.blocks[i]);
+        if (c.x >= boardPtr->width || c.x < 0 ||
+                c.y >= boardPtr->height || c.y < 0) {
+            return false;
+        }
+        // make sure that it's empty
+        char val = boardPtr->board[COORD_INDEX(boardPtr, c.x, c.y)];
+        if (val > 0) {
+            return false;
+        }
+    }
     return true;
 }
