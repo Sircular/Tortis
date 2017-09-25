@@ -12,13 +12,13 @@
 /* Piece types enum. */
 #define PIECE_TYPES_COUNT 6
 enum PieceType {
-    L_L_PIECE,
-    R_L_PIECE,
-    L_ZIGZAG,
-    R_ZIGZAG,
-    T_PIECE,
-    LONG_PIECE,
-    NONE_PIECE
+    L_L_PIECE = 1,
+    R_L_PIECE = 2,
+    L_ZIGZAG_PIECE = 3,
+    R_ZIGZAG_PIECE = 4,
+    T_PIECE = 5,
+    BLOCK_PIECE = 6,
+    LONG_PIECE = 7
 };
 
 /* Piece struct. */

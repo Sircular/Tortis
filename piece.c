@@ -4,42 +4,27 @@
 
 #include "piece.h"
 
-static Coordinate PIECES[6][BLOCKS_PER_PIECE] = {
+static Coordinate PIECES[7][BLOCKS_PER_PIECE] = {
     {
-        COORDINATE(0, -1),
-        COORDINATE(0, 0),
-        COORDINATE(0, 1),
-        COORDINATE(-1, 1)
+        COORDINATE(0, -1), COORDINATE(0, 0), COORDINATE(0, 1), COORDINATE(-1, 1)
     },
     {
-        COORDINATE(0, -1),
-        COORDINATE(0, 0),
-        COORDINATE(0, 1),
-        COORDINATE(1, 1)
+        COORDINATE(0, -1), COORDINATE(0, 0), COORDINATE(0, 1), COORDINATE(1, 1)
     },
     {
-        COORDINATE(0, -1),
-        COORDINATE(0, 0),
-        COORDINATE(-1, 0),
-        COORDINATE(-1, 1)
+        COORDINATE(0, -1), COORDINATE(0, 0), COORDINATE(-1, 0), COORDINATE(-1, 1)
     },
     {
-        COORDINATE(0, -1),
-        COORDINATE(0, 0),
-        COORDINATE(1, 0),
-        COORDINATE(1, 1)
+        COORDINATE(0, -1), COORDINATE(0, 0), COORDINATE(1, 0), COORDINATE(1, 1)
     },
     {
-        COORDINATE(-1, 0),
-        COORDINATE(0, 0),
-        COORDINATE(0, 1),
-        COORDINATE(1, 0)
+        COORDINATE(-1, 0), COORDINATE(0, 0), COORDINATE(0, 1), COORDINATE(1, 0)
     },
     {
-        COORDINATE(-1, 0),
-        COORDINATE(0, 0),
-        COORDINATE(1, 0),
-        COORDINATE(2, 0),
+        COORDINATE(0, 0), COORDINATE(1, 0), COORDINATE(1, 1), COORDINATE(0, 1)
+    },
+    {
+        COORDINATE(-1, 0), COORDINATE(0, 0), COORDINATE(1, 0), COORDINATE(2, 0),
     }
 };
 
@@ -52,7 +37,7 @@ bool piece_init(Piece* piecePtr, enum PieceType type) {
     piecePtr->pos.y = 0;
     int i;
     for (i = 0; i < BLOCKS_PER_PIECE; i++) {
-        piecePtr->blocks[i] = PIECES[type][i];
+        piecePtr->blocks[i] = PIECES[type-1][i];
     }
     return true;
 }
