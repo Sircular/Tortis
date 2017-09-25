@@ -10,7 +10,7 @@
 #define BLOCKS_PER_PIECE 4
 
 /* Piece types enum. */
-#define PIECE_TYPES_COUNT 6
+#define PIECE_TYPES_COUNT 7
 enum PieceType {
     L_L_PIECE = 1,
     R_L_PIECE = 2,
