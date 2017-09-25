@@ -3,6 +3,7 @@
 #include <curses.h>
 
 #include "board.h"
+#include "color.h"
 
 /* Returns if a piece in a particular position or rotation is valid on the
  * given board. */
@@ -41,7 +42,7 @@ void board_setPiece(Board* boardPtr, enum PieceType type) {
         boardPtr->piece = malloc(sizeof(Piece));
         piece_init(boardPtr->piece, type);
     }
-    
+
 }
 
 bool board_movePiece(Board* boardPtr, int x, int y) {
@@ -82,12 +83,13 @@ void board_draw(Board* boardPtr, WINDOW* subWin) {
         int y;
         for (y = 0; y < boardPtr->height; y++) {
             int i = COORD_INDEX(boardPtr, x, y);
-            // TODO: drawing with colors
-            if (boardPtr->board[i] > 0) {
-                mvwprintw(subWin, y+1, (x*2)+1, "XX");
-            } else {
-                mvwprintw(subWin, y+1, (x*2)+1, "  ");
-            }
+            unsigned char val = boardPtr->board[i];
+            int attrs = (int)COLOR_PAIR(val);
+
+            wattron(subWin, attrs);
+            mvwprintw(subWin, y+1, (x*2)+1, "  ");
+            wattroff(subWin, attrs);
+
         }
     }
     touchwin(subWin);
@@ -102,7 +104,7 @@ bool isPieceValid(Board* boardPtr, Piece piece) {
             return false;
         }
         // make sure that it's empty
-        char val = boardPtr->board[COORD_INDEX(boardPtr, c.x, c.y)];
+        unsigned char val = boardPtr->board[COORD_INDEX(boardPtr, c.x, c.y)];
         if (val > 0) {
             return false;
         }

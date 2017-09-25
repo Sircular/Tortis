@@ -16,7 +16,7 @@
 typedef struct Board {
     int width;
     int height;
-    char* board;
+    unsigned char* board;
     Piece* piece;
 } Board;
 
