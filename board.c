@@ -100,7 +100,7 @@ bool isPieceValid(Board* boardPtr, Piece piece) {
     for (i = 0; i < BLOCKS_PER_PIECE; i++) {
         Coordinate c = coordinate_add(piece.pos, piece.blocks[i]);
         if (c.x >= boardPtr->width || c.x < 0 ||
-                c.y >= boardPtr->height || c.y < 0) {
+                c.y >= boardPtr->height) {
             return false;
         }
         // make sure that it's empty
