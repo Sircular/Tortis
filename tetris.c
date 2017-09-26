@@ -56,6 +56,7 @@ int main() {
     }
 
     board_free(board);
+    grabbag_free(grabBag);
     endwin();
     return 0;
 }

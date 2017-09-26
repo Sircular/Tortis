@@ -38,6 +38,15 @@ GrabBag* grabbag_init(size_t n) {
     return bag;
 }
 
+void grabbag_free(GrabBag* bag) {
+    if (bag != NULL) {
+        if (bag->contents != NULL) {
+            free(bag->contents);
+        }
+        free(bag);
+    }
+}
+
 void grabbag_next(GrabBag* bag, enum PieceType* type) {
     if (bag == NULL || bag->contents == NULL) {
         return;

@@ -16,6 +16,9 @@ typedef struct GrabBag {
 /* Initialize a grab bag with n repetitions. */
 GrabBag* grabbag_init(size_t n);
 
+/* Free a grab bag. */
+void grabbag_free(GrabBag* bag);
+
 /* Get the next piece type from a grab bag. */
 void grabbag_next(GrabBag* bag, enum PieceType* type);
 #endif
