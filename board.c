@@ -9,6 +9,9 @@
  * given board. */
 bool isPieceValid(Board* board, Piece piece);
 
+/* Draws a "chunk" on the board. */
+void drawChunk(WINDOW* subWin, int x, int y, int col);
+
 Board* board_init(int width, int height) {
     Board* boardPtr = malloc(sizeof(Board));
     if (boardPtr == NULL) {
@@ -41,6 +44,7 @@ void board_setPiece(Board* boardPtr, enum PieceType type) {
     if (boardPtr->piece == NULL) {
         boardPtr->piece = malloc(sizeof(Piece));
         piece_init(boardPtr->piece, type);
+        boardPtr->piece->pos.x = boardPtr->width/2;
     }
 
 }
@@ -84,15 +88,22 @@ void board_draw(Board* boardPtr, WINDOW* subWin) {
         for (y = 0; y < boardPtr->height; y++) {
             int i = COORD_INDEX(boardPtr, x, y);
             unsigned char val = boardPtr->board[i];
-            int attrs = (int)COLOR_PAIR(val);
-
-            wattron(subWin, attrs);
-            mvwprintw(subWin, y+1, (x*2)+1, "  ");
-            wattroff(subWin, attrs);
-
+            drawChunk(subWin, x, y, val);
+        }
+    }
+    // draw the piece
+    if (boardPtr->piece != NULL) {
+        int i;
+        Piece piece = *(boardPtr->piece);
+        for (i = 0; i < BLOCKS_PER_PIECE; i++) {
+            Coordinate c = coordinate_add(piece.pos, piece.blocks[i]);
+            if (c.y > 0) {
+                drawChunk(subWin, c.x, c.y, 2);
+            }
         }
     }
     touchwin(subWin);
+    wrefresh(subWin);
 }
 
 bool isPieceValid(Board* boardPtr, Piece piece) {
@@ -110,4 +121,11 @@ bool isPieceValid(Board* boardPtr, Piece piece) {
         }
     }
     return true;
+}
+
+void drawChunk(WINDOW* subWin, int x, int y, int col) {
+    int attrs = (int)COLOR_PAIR(col);
+    wattron(subWin, attrs);
+    mvwprintw(subWin, y+1, (x*2)+1, "  ");
+    wattroff(subWin, attrs);
 }
