@@ -35,7 +35,6 @@ int main() {
     raw();
     noecho();
     curs_set(0);
-    //nodelay(stdscr, true);
     refresh();
     colors_init();
     board = board_init(BOARD_WIDTH, BOARD_HEIGHT);
@@ -43,14 +42,19 @@ int main() {
     initWindows(&gameWin, &boardWin); 
     // initialize the grab bag for piece selection
     grabBag = grabbag_init(GRABBAG_REPETITIONS);
+    board_setPiece(board, T_PIECE);
 
     // game loop
     bool running = true;
     while (running) {
+        board_rotatePiece(board, false);
         board_draw(board, boardWin);
         wrefresh(gameWin);
         refresh();
         if (getch() == 10) {
+            running = false;
+        }
+        if (!board_movePiece(board, 0, 1)) {
             running = false;
         }
     }
