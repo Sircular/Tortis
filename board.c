@@ -49,6 +49,19 @@ void board_setPiece(Board* boardPtr, enum PieceType type) {
 
 }
 
+bool board_isLineFull(Board* boardPtr, int line) {
+    if (boardPtr == NULL || line < 0 || line >= boardPtr->height) {
+        return false;
+    }
+    int i;
+    for (i = 0; i < boardPtr->width; i++) {
+        if (boardPtr->board[COORD_INDEX(boardPtr, i, line)] > 0) {
+            return false;
+        }
+    }
+    return true;
+}
+
 bool board_movePiece(Board* boardPtr, int x, int y) {
     if (boardPtr == NULL || boardPtr->piece == NULL) {
         return false;
@@ -70,11 +83,23 @@ bool board_rotatePiece(Board* boardPtr, bool counter) {
     }
     Piece newPiece = *(boardPtr->piece);
     piece_rotate(&newPiece, counter);
-    if (isPieceValid(boardPtr, newPiece)) {
+    if (!isPieceValid(boardPtr, newPiece)) {
         return false;
     }
     *(boardPtr->piece) = newPiece;
     return true;
+}
+
+void board_cementPiece(Board* boardPtr) {
+    if (boardPtr == NULL || boardPtr->piece == NULL) {
+        return;
+    }
+    Piece piece = *(boardPtr->piece);
+    int i;
+    for (i = 0; i < BLOCKS_PER_PIECE; i++) {
+        Coordinate c = coordinate_add(piece.pos, piece.blocks[i]);
+        boardPtr->board[COORD_INDEX(boardPtr, c.x, c.y)] = piece.type;
+    }
 }
 
 void board_draw(Board* boardPtr, WINDOW* subWin) {
@@ -98,7 +123,7 @@ void board_draw(Board* boardPtr, WINDOW* subWin) {
         for (i = 0; i < BLOCKS_PER_PIECE; i++) {
             Coordinate c = coordinate_add(piece.pos, piece.blocks[i]);
             if (c.y > 0) {
-                drawChunk(subWin, c.x, c.y, 2);
+                drawChunk(subWin, c.x, c.y, piece.type);
             }
         }
     }

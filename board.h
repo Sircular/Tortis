@@ -32,13 +32,20 @@ void board_free(Board* boardPtr);
 /* Sets the current falling piece. */
 void board_setPiece(Board* boardPtr, enum PieceType type);
 
+/* Determines if line <line> is completely full. */
+bool board_isLineFull(Board* boardPtr, int line);
+
 /* Attempts to move the piece by the specified coordinates. Returns true if it
  * is a valid move. */
 bool board_movePiece(Board* boardPtr, int x, int y);
 
 /* Attempts to rotation the piece by the specified coordinates. Returns true if
  * it is a valid rotation. */
-bool board_rotatePiece(Board* boartPtr, bool counter);
+bool board_rotatePiece(Board* boardPtr, bool counter);
+
+/* "Cements" the current piece onto the board. Called when a block falls to its
+ * lowest point. */
+void board_cementPiece(Board* boardPtr);
 
 /* Draws the board on the specified window at (0,0). Returns true on success.
  * */
