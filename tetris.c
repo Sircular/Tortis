@@ -27,7 +27,13 @@ static WINDOW* boardWin;
 static GrabBag* grabBag;
 
 /* Initializes the game window and board window. */
-void initWindows(WINDOW** gameWinPtr, WINDOW** boardWinPtr);
+void initWindows(void);
+
+/* Redraws all of the windows and refreshes the screen. */
+void redrawGame(void);
+
+/* The main game loop. */
+void gameLoop(void);
 
 int main() {
     // set up the screen
@@ -39,25 +45,13 @@ int main() {
     colors_init();
     board = board_init(BOARD_WIDTH, BOARD_HEIGHT);
     // initialize the windows
-    initWindows(&gameWin, &boardWin); 
+    initWindows(); 
     // initialize the grab bag for piece selection
     grabBag = grabbag_init(GRABBAG_REPETITIONS);
     board_setPiece(board, T_PIECE);
 
-    // game loop
-    bool running = true;
-    while (running) {
-        board_rotatePiece(board, false);
-        board_draw(board, boardWin);
-        wrefresh(gameWin);
-        refresh();
-        if (getch() == 10) {
-            running = false;
-        }
-        if (!board_movePiece(board, 0, 1)) {
-            running = false;
-        }
-    }
+    redrawGame();
+    gameLoop();
 
     board_free(board);
     grabbag_free(grabBag);
@@ -65,7 +59,7 @@ int main() {
     return 0;
 }
 
-void initWindows(WINDOW** gameWinPtr, WINDOW** boardWinPtr) {
+void initWindows() {
     int boardWinWidth = (BOARD_WIDTH*2) + 2;
     int winHeight = BOARD_HEIGHT+2;
     int totalWidth = boardWinWidth+BOARD_WIDTH;
@@ -74,7 +68,27 @@ void initWindows(WINDOW** gameWinPtr, WINDOW** boardWinPtr) {
     getmaxyx(stdscr, tHeight, tWidth);
 
     board = board_init(BOARD_WIDTH, BOARD_HEIGHT);
-    *gameWinPtr = newwin(winHeight, totalWidth, (tHeight-winHeight)/2,
+    gameWin = newwin(winHeight, totalWidth, (tHeight-winHeight)/2,
             (tWidth-totalWidth)/2);
-    *boardWinPtr = derwin(*gameWinPtr, winHeight, boardWinWidth, 0, 0);
+    boardWin = derwin(gameWin, winHeight, boardWinWidth, 0, 0);
+}
+
+void redrawGame() {
+    board_draw(board, boardWin);
+    wrefresh(gameWin);
+    refresh();
+}
+
+void gameLoop() {
+    bool running = true;
+    while (running) {
+        board_rotatePiece(board, false);
+        redrawGame();
+        if (getch() == 10) {
+            running = false;
+        }
+        if (!board_movePiece(board, 0, 1)) {
+            running = false;
+        }
+    }
 }
