@@ -26,12 +26,21 @@
 
 #define MAX(x, y) ((x) < (y) ? (y) : (x))
 
+#define CHOICE_STRS {"Play", "Exit"}
+#define CHOICE_NUM 2
+#define CHOICE_TITLE "Main Menu"
+#define CHOICE_PLAY 0
+#define CHOICE_EXIT 1
+
 static Board* board;
 
 static WINDOW* gameWin;
 static WINDOW* boardWin;
 
 static GrabBag* grabBag;
+
+/* Performs curses and game struct initialization. */
+void setup(Board** boardRef, GrabBag** bagRef);
 
 /* Initializes the game window and board window. */
 void initWindows(void);
@@ -45,35 +54,52 @@ void gameLoop(void);
 /* Gets the difference between two timevals. */
 long timeDifference(struct timeval* first, struct timeval* second);
 
-char* choices[] = {
-    "Choice 1",
-    "Choice 2"
-};
+/* Shows the main menu and returns the choice made. */
+int showMainMenu(void);
 
 int main() {
-    // set up the screen
+    setup(&board, &grabBag);
+    board_setPiece(board, T_PIECE);
+
+    redrawGame();
+    bool running = true;
+    int choice;
+    while (running) {
+        choice = showMainMenu();
+        endwin();
+        switch (choice) {
+            case CHOICE_PLAY:
+                gameLoop();
+                break;
+            case CHOICE_EXIT:
+                running = false;
+                break;
+            default:
+                // We don't know what else to do
+                running = false;
+        }
+    }
+
+    board_free(board);
+    grabbag_free(grabBag);
+    delwin(boardWin);
+    delwin(gameWin);
+    endwin();
+    return 0;
+}
+
+void setup(Board** boardRef, GrabBag** bagRef) {
     initscr();
     raw();
     noecho();
     curs_set(0);
     refresh();
     colors_init();
-    board = board_init(BOARD_WIDTH, BOARD_HEIGHT);
+    *boardRef = board_init(BOARD_WIDTH, BOARD_HEIGHT);
     // initialize the windows
     initWindows(); 
     // initialize the grab bag for piece selection
-    grabBag = grabbag_init(GRABBAG_REPETITIONS);
-    board_setPiece(board, T_PIECE);
-
-    redrawGame();
-    menu_choice("Test Title", 2, choices);
-    clear();
-    gameLoop();
-
-    board_free(board);
-    grabbag_free(grabBag);
-    endwin();
-    return 0;
+    *bagRef = grabbag_init(GRABBAG_REPETITIONS);
 }
 
 void initWindows() {
@@ -84,7 +110,6 @@ void initWindows() {
     int tWidth, tHeight;
     getmaxyx(stdscr, tHeight, tWidth);
 
-    board = board_init(BOARD_WIDTH, BOARD_HEIGHT);
     gameWin = newwin(winHeight, totalWidth, (tHeight-winHeight)/2,
             (tWidth-totalWidth)/2);
     boardWin = derwin(gameWin, winHeight, boardWinWidth, 0, 0);
@@ -132,4 +157,12 @@ void gameLoop() {
 long timeDifference(struct timeval* first, struct timeval* second) {
     return (second->tv_sec - first->tv_sec) * SECONDS_TO_MILLIS + 
         (second->tv_usec - first->tv_usec) / MICROS_TO_MILLIS;
+}
+
+int showMainMenu() {
+    char* choices[] = CHOICE_STRS;
+    int value = menu_choice(CHOICE_TITLE, CHOICE_NUM, choices);
+    //clear();
+    //redrawGame();
+    return value;
 }

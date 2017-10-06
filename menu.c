@@ -63,7 +63,7 @@ int menu_choice(char* title, int choiceCount, char** choices) {
                 }
         }
     }
-    free(menuWin);
+    delwin(menuWin);
 
     if (chosen) {
         return choice;
@@ -84,7 +84,7 @@ void menu_show(char* title, char* text) {
     wrefresh(win);
     refresh();
     getch();
-    free(win);
+    delwin(win);
 }
 
 WINDOW* createCenteredWindow(int height, int width) {
