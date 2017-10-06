@@ -13,11 +13,18 @@
 #include "board.h"
 #include "grabbag.h"
 #include "color.h"
+#include "menu.h"
+
+#define SECONDS_TO_MILLIS 1000
+#define MICROS_TO_MILLIS 1000
 
 #define BOARD_WIDTH 10
 #define BOARD_HEIGHT 20
 
 #define GRABBAG_REPETITIONS 4
+#define TIMEOUT 1000L // in milliseconds
+
+#define MAX(x, y) ((x) < (y) ? (y) : (x))
 
 static Board* board;
 
@@ -35,6 +42,14 @@ void redrawGame(void);
 /* The main game loop. */
 void gameLoop(void);
 
+/* Gets the difference between two timevals. */
+long timeDifference(struct timeval* first, struct timeval* second);
+
+char* choices[] = {
+    "Choice 1",
+    "Choice 2"
+};
+
 int main() {
     // set up the screen
     initscr();
@@ -51,6 +66,8 @@ int main() {
     board_setPiece(board, T_PIECE);
 
     redrawGame();
+    menu_choice("Test Title", 2, choices);
+    clear();
     gameLoop();
 
     board_free(board);
@@ -80,15 +97,39 @@ void redrawGame() {
 }
 
 void gameLoop() {
+    struct timeval current, last;
     bool running = true;
+    long currentTimeout = TIMEOUT;
+    gettimeofday(&last, NULL);
+
+    redrawGame();
+
     while (running) {
         board_rotatePiece(board, false);
         redrawGame();
-        if (getch() == 10) {
-            running = false;
+        timeout(currentTimeout);
+        int c = getch();
+        gettimeofday(&current, NULL);
+        if (c == ERR) {
+            // timeout
+            currentTimeout = TIMEOUT;
+            if (!board_movePiece(board, 0, 1)) {
+                running = false;
+            }
+        } else {
+            long elapsedTime = MAX(0, timeDifference(&last, &current));
+            currentTimeout = MAX(0, currentTimeout-elapsedTime);
+            // handle other keys
+            if (c == 10) {
+                running = false;
+            }
         }
-        if (!board_movePiece(board, 0, 1)) {
-            running = false;
-        }
+        last = current;
     }
+    timeout(-1);
+}
+
+long timeDifference(struct timeval* first, struct timeval* second) {
+    return (second->tv_sec - first->tv_sec) * SECONDS_TO_MILLIS + 
+        (second->tv_usec - first->tv_usec) / MICROS_TO_MILLIS;
 }
