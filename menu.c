@@ -5,6 +5,8 @@
 
 #include "menu.h"
 
+#define MAX(x, y) ((x) > (y) ? (x) : (y))
+
 #define CHOICE_STR "->"
 #define CHOICE_STR_LEN (sizeof(CHOICE_STR)-1)
 #define ENTER_CODE 10
@@ -22,12 +24,11 @@ void drawChoices(WINDOW* win, char* title, int choiceCount, int currentChoice,
 int menu_choice(char* title, int choiceCount, char** choices) {
     int winHeight, winWidth, i, choice, c;
     bool chosen;
-    size_t titleLen, longestChoice;
+    size_t longestChoice;
     WINDOW* menuWin;
 
     winHeight = choiceCount + 1 /* for the title bar */ +
         2 /* for the top and bottom bar */;
-    titleLen = strlen(title);
 
     longestChoice = 0;
     for (i = 0; i < choiceCount; i++) {
@@ -44,8 +45,6 @@ int menu_choice(char* title, int choiceCount, char** choices) {
     choice = 0;
     chosen = false;
 
-    drawChoices(menuWin, title, choiceCount, choice, choices);
-    c = getch();
     while (!chosen) {
         drawChoices(menuWin, title, choiceCount, choice, choices);
         c = getch();
@@ -64,6 +63,7 @@ int menu_choice(char* title, int choiceCount, char** choices) {
                 }
         }
     }
+    free(menuWin);
 
     if (chosen) {
         return choice;
@@ -73,7 +73,18 @@ int menu_choice(char* title, int choiceCount, char** choices) {
 }
 
 void menu_show(char* title, char* text) {
+    int winHeight = 4;
+    int winWidth = 2+(int)MAX(strlen(title), strlen(text));
+    WINDOW* win = createCenteredWindow(winHeight, winWidth);
 
+    box(win, 0, 0);
+    mvwprintw(win, 1, (winWidth-(int)strlen(title))/2, title);
+    mvwprintw(win, 2, (winWidth-(int)strlen(text))/2, text);
+
+    wrefresh(win);
+    refresh();
+    getch();
+    free(win);
 }
 
 WINDOW* createCenteredWindow(int height, int width) {
