@@ -14,17 +14,15 @@
 #include "grabbag.h"
 #include "color.h"
 #include "menu.h"
+#include "keys.h"
 
-#define SECONDS_TO_MILLIS 1000
-#define MICROS_TO_MILLIS 1000
+#define MICROS_TO_SECONDS 1000000
 
 #define BOARD_WIDTH 10
 #define BOARD_HEIGHT 20
 
 #define GRABBAG_REPETITIONS 4
-#define TIMEOUT 1000L // in milliseconds
-
-#define MAX(x, y) ((x) < (y) ? (y) : (x))
+#define TIMEOUT 1000000 // in microseconds
 
 #define CHOICE_STRS {"Play", "Exit"}
 #define CHOICE_NUM 2
@@ -51,8 +49,8 @@ void redrawGame(void);
 /* The main game loop. */
 void gameLoop(void);
 
-/* Gets the difference between two timevals. */
-long timeDifference(struct timeval* first, struct timeval* second);
+/* Gets input and simulates the block until it is locked into place. */
+void dropBlock(long timeout);
 
 /* Shows the main menu and returns the choice made. */
 int showMainMenu(void);
@@ -122,41 +120,57 @@ void redrawGame() {
 }
 
 void gameLoop() {
-    struct timeval current, last;
-    bool running = true;
-    long currentTimeout = TIMEOUT;
-    gettimeofday(&last, NULL);
 
-    redrawGame();
-
-    while (running) {
-        board_rotatePiece(board, false);
-        redrawGame();
-        timeout(currentTimeout);
-        int c = getch();
-        gettimeofday(&current, NULL);
-        if (c == ERR) {
-            // timeout
-            currentTimeout = TIMEOUT;
-            if (!board_movePiece(board, 0, 1)) {
-                running = false;
-            }
-        } else {
-            long elapsedTime = MAX(0, timeDifference(&last, &current));
-            currentTimeout = MAX(0, currentTimeout-elapsedTime);
-            // handle other keys
-            if (c == 10) {
-                running = false;
-            }
-        }
-        last = current;
-    }
-    timeout(-1);
+    dropBlock(TIMEOUT);
 }
 
-long timeDifference(struct timeval* first, struct timeval* second) {
-    return (second->tv_sec - first->tv_sec) * SECONDS_TO_MILLIS + 
-        (second->tv_usec - first->tv_usec) / MICROS_TO_MILLIS;
+void dropBlock(long timeout) {
+    bool falling = true;
+    struct timeval time, tmp_time;
+    // setup inputs for select
+    fd_set in, tmp_in;
+
+    FD_ZERO(&in);
+    FD_SET(0, &in); //adds stdin
+
+    time.tv_sec = timeout/MICROS_TO_SECONDS;
+    time.tv_usec = timeout%MICROS_TO_SECONDS;
+    tmp_time = time;
+
+    while (falling) {
+        redrawGame();
+        tmp_in = in; // so we don't overwrite the stream
+        int sel_value = select(FD_SETSIZE, &tmp_in, NULL, NULL, &tmp_time);
+        if (sel_value != 0) { // we didn't timeout
+            int c = getch();
+            switch(c) {
+                case KEY_UP:
+                    board_rotatePiece(board, false);
+                    break;
+                case KEY_LEFT:
+                    board_movePiece(board, -1, 0);
+                    break;
+                case KEY_RIGHT:
+                    board_movePiece(board, 1, 0);
+                    break;
+                case KEY_DOWN:
+                    if (board_movePiece(board, 0, 1)) {
+                        // reset the timer
+                        tmp_time = time;
+                    } else {
+                        falling = false;
+                    }
+                    break;
+            }
+        } else { // we timed out
+            if (board_movePiece(board, 0, 1)) {
+                // reset the timer
+                tmp_time = time;
+            } else {
+                falling = false;
+            }
+        }
+    }
 }
 
 int showMainMenu() {

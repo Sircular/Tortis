@@ -4,14 +4,12 @@
 #include <curses.h>
 
 #include "menu.h"
+#include "keys.h"
 
 #define MAX(x, y) ((x) > (y) ? (x) : (y))
 
 #define CHOICE_STR "->"
 #define CHOICE_STR_LEN (sizeof(CHOICE_STR)-1)
-#define ENTER_CODE 10
-#define UP_CODE 65
-#define DOWN_CODE 66
 
 /* Creates a window centered in the terminal. */
 WINDOW* createCenteredWindow(int width, int height);
@@ -49,15 +47,15 @@ int menu_choice(char* title, int choiceCount, char** choices) {
         drawChoices(menuWin, title, choiceCount, choice, choices);
         c = getch();
         switch (c) {
-            case ENTER_CODE:
+            case KEY_ENTER:
                 chosen = true;
                 break;
-            case UP_CODE:
+            case KEY_UP:
                 if (choice > 0) {
                     choice--;
                 }
                 break;
-            case DOWN_CODE:
+            case KEY_DOWN:
                 if (choice < choiceCount-1) {
                     choice++;
                 }
