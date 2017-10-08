@@ -20,6 +20,7 @@
 
 #define BOARD_WIDTH 10
 #define BOARD_HEIGHT 20
+#define INFO_PANEL_WIDTH 5
 
 #define GRABBAG_REPETITIONS 4
 #define TIMEOUT 1000000 // in microseconds
@@ -31,14 +32,16 @@
 #define CHOICE_EXIT 1
 
 static Board* board;
+static Board* previewBoard;
 
 static WINDOW* gameWin;
 static WINDOW* boardWin;
+static WINDOW* previewWin;
 
 static GrabBag* grabBag;
 
 /* Performs curses and game struct initialization. */
-void setup(Board** boardRef, GrabBag** bagRef);
+void setup(void);
 
 /* Initializes the game window and board window. */
 void initWindows(void);
@@ -52,12 +55,18 @@ void gameLoop(void);
 /* Gets input and simulates the block until it is locked into place. */
 void dropBlock(long timeout);
 
+/* Gets the next piece and updates the preview so that we can properly know
+ * what pieces are coming. */
+enum PieceType getNextPiece(void);
+
+/* Redraws the window that shows the next piece. */
+void redrawPreviewWindow(void);
+
 /* Shows the main menu and returns the choice made. */
 int showMainMenu(void);
 
 int main() {
-    setup(&board, &grabBag);
-    board_setPiece(board, T_PIECE);
+    setup();
 
     redrawGame();
     bool running = true;
@@ -86,24 +95,30 @@ int main() {
     return 0;
 }
 
-void setup(Board** boardRef, GrabBag** bagRef) {
+void setup() {
     initscr();
     raw();
     noecho();
     curs_set(0);
     refresh();
     colors_init();
-    *boardRef = board_init(BOARD_WIDTH, BOARD_HEIGHT);
+    board = board_init(BOARD_WIDTH, BOARD_HEIGHT);
+    previewBoard = board_init(INFO_PANEL_WIDTH, INFO_PANEL_WIDTH);
+
+    // initialize the grab bag for piece selection
+    grabBag = grabbag_init(GRABBAG_REPETITIONS);
+    getNextPiece();
+
     // initialize the windows
     initWindows(); 
-    // initialize the grab bag for piece selection
-    *bagRef = grabbag_init(GRABBAG_REPETITIONS);
 }
 
 void initWindows() {
     int boardWinWidth = (BOARD_WIDTH*2) + 2;
+    int infoWinWidth = (INFO_PANEL_WIDTH*2) + 2;
+    int previewHeight = INFO_PANEL_WIDTH + 2;
     int winHeight = BOARD_HEIGHT+2;
-    int totalWidth = boardWinWidth+BOARD_WIDTH;
+    int totalWidth = boardWinWidth+infoWinWidth;
 
     int tWidth, tHeight;
     getmaxyx(stdscr, tHeight, tWidth);
@@ -111,6 +126,8 @@ void initWindows() {
     gameWin = newwin(winHeight, totalWidth, (tHeight-winHeight)/2,
             (tWidth-totalWidth)/2);
     boardWin = derwin(gameWin, winHeight, boardWinWidth, 0, 0);
+    previewWin = derwin(gameWin, previewHeight, infoWinWidth, 0, boardWinWidth);
+    redrawPreviewWindow();
 }
 
 void redrawGame() {
@@ -120,8 +137,15 @@ void redrawGame() {
 }
 
 void gameLoop() {
-
-    dropBlock(TIMEOUT);
+    bool running = true;
+    while (running) {
+        if (board->piece == NULL) {
+            enum PieceType piece = getNextPiece();
+            board_setPiece(board, piece);
+        }
+        dropBlock(TIMEOUT);
+        board_cementPiece(board);
+    }
 }
 
 void dropBlock(long timeout) {
@@ -173,10 +197,27 @@ void dropBlock(long timeout) {
     }
 }
 
+enum PieceType getNextPiece() {
+    enum PieceType piece;
+    if (previewBoard->piece != NULL) {
+        piece = previewBoard->piece->type;
+    } else {
+        grabbag_next(grabBag, &piece);
+    }
+    enum PieceType newPiece;
+    grabbag_next(grabBag, &newPiece);
+    board_setPiece(previewBoard, newPiece);
+    printf("%d\r\n", newPiece);
+    redrawPreviewWindow();
+    return piece;
+}
+
 int showMainMenu() {
     char* choices[] = CHOICE_STRS;
     int value = menu_choice(CHOICE_TITLE, CHOICE_NUM, choices);
-    //clear();
-    //redrawGame();
     return value;
+}
+
+void redrawPreviewWindow() {
+    board_draw(previewBoard, previewWin);
 }

@@ -43,9 +43,9 @@ void board_setPiece(Board* boardPtr, enum PieceType type) {
     }
     if (boardPtr->piece == NULL) {
         boardPtr->piece = malloc(sizeof(Piece));
-        piece_init(boardPtr->piece, type);
-        boardPtr->piece->pos.x = boardPtr->width/2;
     }
+    piece_init(boardPtr->piece, type);
+    boardPtr->piece->pos.x = boardPtr->width/2;
 
 }
 
@@ -100,6 +100,7 @@ void board_cementPiece(Board* boardPtr) {
         Coordinate c = coordinate_add(piece.pos, piece.blocks[i]);
         boardPtr->board[COORD_INDEX(boardPtr, c.x, c.y)] = piece.type;
     }
+    boardPtr->piece = NULL;
 }
 
 void board_draw(Board* boardPtr, WINDOW* subWin) {
