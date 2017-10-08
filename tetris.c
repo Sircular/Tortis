@@ -6,6 +6,7 @@
  */
 
 #include <curses.h>
+#include <time.h>
 #include <stdbool.h>
 #include <sys/select.h>
 #include <sys/time.h>
@@ -19,11 +20,10 @@
 #define MICROS_TO_SECONDS 1000000
 
 #define BOARD_WIDTH 10
-#define BOARD_HEIGHT 20
-#define INFO_PANEL_WIDTH 5
+#define BOARD_HEIGHT 22
+#define INFO_PANEL_WIDTH 8
 
 #define GRABBAG_REPETITIONS 4
-#define TIMEOUT 1000000 // in microseconds
 
 #define CHOICE_STRS {"Play", "Exit"}
 #define CHOICE_NUM 2
@@ -31,12 +31,31 @@
 #define CHOICE_PLAY 0
 #define CHOICE_EXIT 1
 
+// TODO: Implement difficulty
+#define TIMEOUT_COUNT 9
+static long TIMEOUTS[] = {
+    1000000,
+    750000,
+    500000,
+    350000,
+    250000,
+    200000,
+    150000,
+    100000,
+    50000
+};
+
+static int difficulty;
+static int linesCleared;
+static int score;
+
 static Board* board;
 static Board* previewBoard;
 
 static WINDOW* gameWin;
 static WINDOW* boardWin;
 static WINDOW* previewWin;
+static WINDOW* infoWin;
 
 static GrabBag* grabBag;
 
@@ -68,10 +87,16 @@ int showMainMenu(void);
 int main() {
     setup();
 
-    redrawGame();
     bool running = true;
     int choice;
     while (running) {
+        // reset scores
+        linesCleared = 0;
+        score = 0;
+        difficulty = 0;
+        redrawGame();
+        board_clear(board);
+
         choice = showMainMenu();
         endwin();
         switch (choice) {
@@ -116,9 +141,10 @@ void setup() {
 void initWindows() {
     int boardWinWidth = (BOARD_WIDTH*2) + 2;
     int infoWinWidth = (INFO_PANEL_WIDTH*2) + 2;
-    int previewHeight = INFO_PANEL_WIDTH + 2;
-    int winHeight = BOARD_HEIGHT+2;
     int totalWidth = boardWinWidth+infoWinWidth;
+    int winHeight = BOARD_HEIGHT+2;
+    int previewHeight = INFO_PANEL_WIDTH + 2;
+    int infoWinHeight = winHeight - previewHeight;
 
     int tWidth, tHeight;
     getmaxyx(stdscr, tHeight, tWidth);
@@ -127,6 +153,7 @@ void initWindows() {
             (tWidth-totalWidth)/2);
     boardWin = derwin(gameWin, winHeight, boardWinWidth, 0, 0);
     previewWin = derwin(gameWin, previewHeight, infoWinWidth, 0, boardWinWidth);
+    infoWin = derwin(gameWin, infoWinHeight, infoWinWidth, previewHeight, boardWinWidth);
     redrawPreviewWindow();
 }
 
@@ -137,14 +164,52 @@ void redrawGame() {
 }
 
 void gameLoop() {
+    redrawGame();
+    redrawPreviewWindow();
     bool running = true;
     while (running) {
         if (board->piece == NULL) {
             enum PieceType piece = getNextPiece();
             board_setPiece(board, piece);
         }
-        dropBlock(TIMEOUT);
+        int timeoutIndex = (difficulty < TIMEOUT_COUNT) ? 
+            difficulty : TIMEOUT_COUNT-1;
+        dropBlock(TIMEOUTS[timeoutIndex]);
+        // check if you lost, bruh
+        if (board->piece->pos.y <= 0) {
+            // it's above the board
+            running = false;
+            break;
+        }
         board_cementPiece(board);
+        // check for any lines to clear
+        int i;
+        int turnLinesCleared = 0;
+        for (i = 0; i < board->height; i++) {
+            if (board_isLineFull(board, i)) {
+                board_clearLine(board, i);
+                board_shiftLine(board, i);
+                turnLinesCleared++;
+            }
+        }
+        linesCleared += turnLinesCleared;
+        // increase the score
+        switch(turnLinesCleared) {
+            case 1:
+                score += 40*(difficulty+1);
+                break;
+            case 2:
+                score += 100*(difficulty+1);
+                break;
+            case 3:
+                score += 300*(difficulty+1);
+                break;
+            case 4:
+                score += 1200*(difficulty+1);
+                break;
+        }
+        // recalculate difficulty
+        difficulty = linesCleared/10;
     }
 }
 
@@ -207,7 +272,8 @@ enum PieceType getNextPiece() {
     enum PieceType newPiece;
     grabbag_next(grabBag, &newPiece);
     board_setPiece(previewBoard, newPiece);
-    printf("%d\r\n", newPiece);
+    board_movePiece(previewBoard, 0, INFO_PANEL_WIDTH/2-1);
+    //board->piece->pos = c;
     redrawPreviewWindow();
     return piece;
 }
@@ -220,4 +286,9 @@ int showMainMenu() {
 
 void redrawPreviewWindow() {
     board_draw(previewBoard, previewWin);
+    box(infoWin, 0, 0);
+    mvwprintw(infoWin, 1, 1, "Score: %5d", score);
+    mvwprintw(infoWin, 3, 1, "Lines: %5d", linesCleared);
+    mvwprintw(infoWin, 5, 1, "Level: %5d", difficulty);
+    wrefresh(infoWin);
 }
