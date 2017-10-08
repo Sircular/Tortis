@@ -6,8 +6,6 @@
 #include "menu.h"
 #include "keys.h"
 
-#define MAX(x, y) ((x) > (y) ? (x) : (y))
-
 #define CHOICE_STR "->"
 #define CHOICE_STR_LEN (sizeof(CHOICE_STR)-1)
 
@@ -68,21 +66,6 @@ int menu_choice(char* title, int choiceCount, char** choices) {
     } else {
         return -1;
     }
-}
-
-void menu_show(char* title, char* text) {
-    int winHeight = 4;
-    int winWidth = 2+(int)MAX(strlen(title), strlen(text));
-    WINDOW* win = createCenteredWindow(winHeight, winWidth);
-
-    box(win, 0, 0);
-    mvwprintw(win, 1, (winWidth-(int)strlen(title))/2, title);
-    mvwprintw(win, 2, (winWidth-(int)strlen(text))/2, text);
-
-    wrefresh(win);
-    refresh();
-    getch();
-    delwin(win);
 }
 
 WINDOW* createCenteredWindow(int height, int width) {

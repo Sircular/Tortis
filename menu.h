@@ -4,5 +4,3 @@
  * error. */
 int menu_choice(char* title, int choiceCount, char** choices);
 
-/* Displays information to the user. */
-void menu_show(char* title, char* text);
