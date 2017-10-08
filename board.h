@@ -35,6 +35,12 @@ void board_setPiece(Board* boardPtr, enum PieceType type);
 /* Determines if line <line> is completely full. */
 bool board_isLineFull(Board* boardPtr, int line);
 
+/* Clears a line on the board. (Note: does not shift down after clearing. */
+void board_clearLine(Board* boardPtr, int line);
+
+/* Shifts the given line down, filling the top row with empty blocks. */
+void board_shiftLine(Board* boardPtr, int line);
+
 /* Attempts to move the piece by the specified coordinates. Returns true if it
  * is a valid move. */
 bool board_movePiece(Board* boardPtr, int x, int y);
@@ -50,4 +56,7 @@ void board_cementPiece(Board* boardPtr);
 /* Draws the board on the specified window at (0,0). Returns true on success.
  * */
 void board_draw(Board* boardPtr, WINDOW* subWin);
+
+/* Clears the board. */
+void board_clear(Board* boardPtr);
 #endif

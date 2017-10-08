@@ -45,7 +45,7 @@ void board_setPiece(Board* boardPtr, enum PieceType type) {
         boardPtr->piece = malloc(sizeof(Piece));
     }
     piece_init(boardPtr->piece, type);
-    boardPtr->piece->pos.x = boardPtr->width/2;
+    boardPtr->piece->pos.x = boardPtr->width/2 - 1;
 
 }
 
@@ -55,7 +55,7 @@ bool board_isLineFull(Board* boardPtr, int line) {
     }
     int i;
     for (i = 0; i < boardPtr->width; i++) {
-        if (boardPtr->board[COORD_INDEX(boardPtr, i, line)] > 0) {
+        if (boardPtr->board[COORD_INDEX(boardPtr, i, line)] == 0) {
             return false;
         }
     }
@@ -130,6 +130,41 @@ void board_draw(Board* boardPtr, WINDOW* subWin) {
     }
     touchwin(subWin);
     wrefresh(subWin);
+}
+
+void board_clearLine(Board* boardPtr, int line) {
+    if (boardPtr == NULL || line < 0 || line >= boardPtr->height) {
+        return;
+    }
+    int i;
+    for (i = 0; i < boardPtr->width; i++) {
+        boardPtr->board[COORD_INDEX(boardPtr, i, line)] = 0;
+    }
+}
+
+void board_shiftLine(Board* boardPtr, int line) {
+    if (boardPtr == NULL || line < 0 || line >= boardPtr->height) {
+        return;
+    }
+    int x;
+    for (x = 0; x < boardPtr->width; x++) {
+        int y;
+        for (y = line; y > 0; y--) {
+            boardPtr->board[COORD_INDEX(boardPtr, x, y)] =
+                boardPtr->board[COORD_INDEX(boardPtr, x, y-1)];
+        }
+        boardPtr->board[COORD_INDEX(boardPtr, x, 0)] = 0;
+    }
+}
+
+void board_clear(Board* boardPtr) {
+    if (boardPtr == NULL) {
+        return;
+    }
+    int i;
+    for (i = 0; i < boardPtr->width*boardPtr->height; i++) {
+        boardPtr->board[i] = 0;
+    }
 }
 
 bool isPieceValid(Board* boardPtr, Piece piece) {
