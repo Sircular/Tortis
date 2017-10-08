@@ -1,7 +1,7 @@
 CC=clang
 CFLAGS=-Weverything -Wno-padded
 LIBS=-lncurses
-BIN=tetris
+BIN=tortis
 
 SOURCES=$(wildcard *.c)
 OBJECTS=$(SOURCES:.c=.o)

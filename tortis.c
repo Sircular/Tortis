@@ -1,5 +1,5 @@
 /*
- * Tetris Clone
+ * Tortis: A Tetris Clone
  * Walter Mays
  *
  * Entry Point
