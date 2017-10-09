@@ -25,7 +25,7 @@
 
 #define GRABBAG_REPETITIONS 4
 
-#define CHOICE_STRS {"Play", "Exit"}
+#define CHOICE_STRS {"Play Tortis", "Exit Tortis"}
 #define CHOICE_NUM 2
 #define CHOICE_TITLE "Main Menu"
 #define CHOICE_PLAY 0
@@ -249,6 +249,10 @@ void dropBlock(long timeout) {
                     } else {
                         falling = false;
                     }
+                    break;
+                case KEY_QUICKDROP:
+                    while (board_movePiece(board, 0, 1)){}
+                    falling = false;
                     break;
             }
         } else { // we timed out

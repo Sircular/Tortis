@@ -5,11 +5,12 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wmacro-redefined"
 
-#define KEY_ENTER   10
-#define KEY_UP      'w'
-#define KEY_LEFT    'a'
-#define KEY_DOWN    's'
-#define KEY_RIGHT   'd'
+#define KEY_ENTER       10
+#define KEY_UP          'w'
+#define KEY_LEFT        'a'
+#define KEY_DOWN        's'
+#define KEY_RIGHT       'd'
+#define KEY_QUICKDROP   'q'
 
 #pragma clang diagnostic pop
 
