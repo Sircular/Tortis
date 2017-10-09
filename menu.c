@@ -7,6 +7,7 @@
 #include "keys.h"
 
 #define CHOICE_STR "->"
+#define CLEAR_CHOICE_STR "  "
 #define CHOICE_STR_LEN (sizeof(CHOICE_STR)-1)
 
 /* Creates a window centered in the terminal. */
@@ -78,15 +79,15 @@ void drawChoices(WINDOW* win, char* title, int choiceCount, int currentChoice,
         char** choices) {
     int winWidth, winHeight, i;
     getmaxyx(win, winHeight, winWidth);
-    wclear(win);
     box(win, 0, 0);
     mvwprintw(win, 1, (winWidth-(int)strlen(title))/2, title);
     for (i = 0; i < choiceCount; i++) {
         mvwprintw(win, i+2, CHOICE_STR_LEN+1, choices[i]);
         if (i == currentChoice) {
             mvwprintw(win, i+2, 1, CHOICE_STR);
+        } else {
+            mvwprintw(win, i+2, 1, CLEAR_CHOICE_STR);
         }
     }
     wrefresh(win);
-    refresh();
 }
