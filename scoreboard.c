@@ -3,6 +3,8 @@
 
 #include "scoreboard.h"
 
+void prettyPrint(int value, char* buffer);
+
 ScoreBoard* scoreboard_init() {
     ScoreBoard* board = malloc(sizeof(ScoreBoard));
     board->linesCleared = 0;
@@ -38,9 +40,42 @@ void scoreboard_draw(ScoreBoard* board, WINDOW* win) {
         return;
     }
     box(win, 0, 0);
-    mvwprintw(win, 1, 1, "Score:     %5d", board->score);
-    mvwprintw(win, 2, 1, "Cleared:   %5d", board->score);
-    mvwprintw(win, 3, 1, "Difficuly: %5d", board->score);
+    char buffer[64];
+    prettyPrint(board->score, buffer);
+    mvwprintw(win, 1, 1, "Score:     %5s", buffer);
+    mvwprintw(win, 2, 1, "Cleared:   %5d", board->linesCleared);
+    mvwprintw(win, 3, 1, "Difficuly: %5d", board->difficulty);
     touchwin(win);
     wrefresh(win);
+}
+
+void prettyPrint(int value, char* buffer) {
+    // figure out how many digits there are
+    int digits = 0;
+    int valCopy = value;
+    while (valCopy > 0) {
+        digits++;
+        valCopy /= 10;
+    }
+    if (digits == 0) {
+        buffer[0] = '0';
+        buffer[1] = '\0';
+    } else {
+        int mask = 1;
+        int i, bi;
+        for (i = 0; i < digits; i++) {
+            mask *= 10;
+        }
+        for (i = 0, bi = 0; i < digits; i++) {
+            int digit = (value % mask) / (mask / 10);
+            buffer[bi] = (char) ('0' + digit);
+            bi++;
+            mask /= 10;
+            if ((digits - i - 1) % 3 == 0 && (digits - i - 1) > 0) {
+                buffer[bi] = ',';
+                bi++;
+            }
+        }
+        buffer[bi] = '\0';
+    }
 }
