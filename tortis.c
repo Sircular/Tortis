@@ -12,6 +12,7 @@
 #include <sys/time.h>
 
 #include "board.h"
+#include "scoreboard.h"
 #include "grabbag.h"
 #include "color.h"
 #include "menu.h"
@@ -45,17 +46,14 @@ static long TIMEOUTS[] = {
     50000
 };
 
-static int difficulty;
-static int linesCleared;
-static int score;
-
 static Board* board;
 static Board* previewBoard;
+static ScoreBoard* scoreboard;
 
 static WINDOW* gameWin;
 static WINDOW* boardWin;
 static WINDOW* previewWin;
-static WINDOW* infoWin;
+static WINDOW* scoreWin;
 
 static GrabBag* grabBag;
 
@@ -91,9 +89,9 @@ int main() {
     int choice;
     while (running) {
         // reset scores
-        linesCleared = 0;
-        score = 0;
-        difficulty = 0;
+        scoreboard->linesCleared = 0;
+        scoreboard->score = 0;
+        scoreboard->difficulty = 0;
         redrawGame();
         board_clear(board);
 
@@ -113,6 +111,7 @@ int main() {
     }
 
     board_free(board);
+    scoreboard_free(scoreboard);
     grabbag_free(grabBag);
     delwin(boardWin);
     delwin(gameWin);
@@ -129,6 +128,7 @@ void setup() {
     colors_init();
     board = board_init(BOARD_WIDTH, BOARD_HEIGHT);
     previewBoard = board_init(INFO_PANEL_WIDTH, INFO_PANEL_WIDTH);
+    scoreboard = scoreboard_init();
 
     // initialize the grab bag for piece selection
     grabBag = grabbag_init(GRABBAG_REPETITIONS);
@@ -153,7 +153,7 @@ void initWindows() {
             (tWidth-totalWidth)/2);
     boardWin = derwin(gameWin, winHeight, boardWinWidth, 0, 0);
     previewWin = derwin(gameWin, previewHeight, infoWinWidth, 0, boardWinWidth);
-    infoWin = derwin(gameWin, infoWinHeight, infoWinWidth, previewHeight, boardWinWidth);
+    scoreWin = derwin(gameWin, infoWinHeight, infoWinWidth, previewHeight, boardWinWidth);
     redrawPreviewWindow();
 }
 
@@ -172,8 +172,8 @@ void gameLoop() {
             enum PieceType piece = getNextPiece();
             board_setPiece(board, piece);
         }
-        int timeoutIndex = (difficulty < TIMEOUT_COUNT) ? 
-            difficulty : TIMEOUT_COUNT-1;
+        int timeoutIndex = (scoreboard->difficulty < TIMEOUT_COUNT) ? 
+            scoreboard->difficulty : TIMEOUT_COUNT-1;
         dropBlock(TIMEOUTS[timeoutIndex]);
         // check if you lost, bruh
         if (board->piece->pos.y <= 0) {
@@ -192,24 +192,7 @@ void gameLoop() {
                 turnLinesCleared++;
             }
         }
-        linesCleared += turnLinesCleared;
-        // increase the score
-        switch(turnLinesCleared) {
-            case 1:
-                score += 40*(difficulty+1);
-                break;
-            case 2:
-                score += 100*(difficulty+1);
-                break;
-            case 3:
-                score += 300*(difficulty+1);
-                break;
-            case 4:
-                score += 1200*(difficulty+1);
-                break;
-        }
-        // recalculate difficulty
-        difficulty = linesCleared/10;
+        scoreboard_clearLines(scoreboard, turnLinesCleared);
     }
 }
 
@@ -290,9 +273,5 @@ int showMainMenu() {
 
 void redrawPreviewWindow() {
     board_draw(previewBoard, previewWin);
-    box(infoWin, 0, 0);
-    mvwprintw(infoWin, 1, 1, "Score: %5d", score);
-    mvwprintw(infoWin, 3, 1, "Lines: %5d", linesCleared);
-    mvwprintw(infoWin, 5, 1, "Level: %5d", difficulty);
-    wrefresh(infoWin);
+    scoreboard_draw(scoreboard, scoreWin);
 }
