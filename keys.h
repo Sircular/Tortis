@@ -11,6 +11,7 @@
 #define KEY_DOWN        's'
 #define KEY_RIGHT       'd'
 #define KEY_QUICKDROP   'q'
+#define KEY_PAUSE       'p'
 
 #pragma clang diagnostic pop
 

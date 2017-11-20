@@ -237,6 +237,10 @@ void dropBlock(long timeout) {
                     while (board_movePiece(board, 0, 1)){}
                     falling = false;
                     break;
+                case KEY_PAUSE:
+                    // simple pausing
+                    while (getch() != KEY_PAUSE) {}
+                    break;
             }
         } else { // we timed out
             if (board_movePiece(board, 0, 1)) {
