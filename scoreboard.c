@@ -32,6 +32,8 @@ void scoreboard_clearLines(ScoreBoard* board, int n) {
             default: score = 0;
         }
         board->score += score;
+        // check for difficulty
+        board->difficulty = board->linesCleared/10;
     }
 }
 
