@@ -26,11 +26,12 @@
 
 #define GRABBAG_REPETITIONS 4
 
-#define CHOICE_STRS {"Play Tortis", "Exit Tortis"}
-#define CHOICE_NUM 2
+#define CHOICE_STRS {"Normal Mode", "Zen Mode", "Exit Tortis"}
+#define CHOICE_NUM 3
 #define CHOICE_TITLE "Main Menu"
 #define CHOICE_PLAY 0
-#define CHOICE_EXIT 1
+#define CHOICE_ZEN  1
+#define CHOICE_EXIT 2
 
 // TODO: Implement difficulty
 #define TIMEOUT_COUNT 9
@@ -56,6 +57,8 @@ static WINDOW* previewWin;
 static WINDOW* scoreWin;
 
 static GrabBag* grabBag;
+
+static bool isZen;
 
 /* Performs curses and game struct initialization. */
 void setup(void);
@@ -99,6 +102,11 @@ int main() {
         endwin();
         switch (choice) {
             case CHOICE_PLAY:
+                isZen = false;
+                gameLoop();
+                break;
+            case CHOICE_ZEN:
+                isZen = true;
                 gameLoop();
                 break;
             case CHOICE_EXIT:
@@ -174,7 +182,8 @@ void gameLoop() {
         }
         int timeoutIndex = (scoreboard->difficulty < TIMEOUT_COUNT) ? 
             scoreboard->difficulty : TIMEOUT_COUNT-1;
-        dropBlock(TIMEOUTS[timeoutIndex]);
+        long timeout = isZen ? TIMEOUTS[0] : TIMEOUTS[timeoutIndex];
+        dropBlock(timeout);
         // check if you lost, bruh
         if (board->piece->pos.y <= 0) {
             // it's above the board
