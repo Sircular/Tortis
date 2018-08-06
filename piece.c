@@ -46,6 +46,10 @@ void piece_rotate(Piece* piecePtr, bool counter) {
     if (piecePtr == NULL) {
         return;
     }
+    /* Block pieces are special and don't get rotated. */
+    if (piecePtr->type == BLOCK_PIECE) {
+        return;
+    }
     int i;
     Coordinate c;
     for (i = 0; i < BLOCKS_PER_PIECE; i++) {
