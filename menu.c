@@ -58,6 +58,7 @@ int menu_choice(char* title, int choiceCount, char** choices) {
                 if (choice < choiceCount-1) {
                     choice++;
                 }
+                break;
         }
     }
     delwin(menuWin);

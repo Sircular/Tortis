@@ -33,7 +33,6 @@
 #define CHOICE_ZEN  1
 #define CHOICE_EXIT 2
 
-// TODO: Implement difficulty
 #define TIMEOUT_COUNT 9
 static long TIMEOUTS[] = {
     1000000,
@@ -91,7 +90,6 @@ int main() {
     bool running = true;
     int choice;
     while (running) {
-        // reset scores
         scoreboard->linesCleared = 0;
         scoreboard->score = 0;
         scoreboard->difficulty = 0;
@@ -99,7 +97,6 @@ int main() {
         board_clear(board);
 
         choice = showMainMenu();
-        endwin();
         switch (choice) {
             case CHOICE_PLAY:
                 isZen = false;
