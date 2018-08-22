@@ -4,3 +4,6 @@
  * error. */
 int menu_choice(char* title, int choiceCount, char** choices);
 
+/* Opens a pause window that remains until the pause key is pressed again. */
+void menu_pauseMenu(void);
+

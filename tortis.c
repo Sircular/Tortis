@@ -245,7 +245,7 @@ void dropBlock(long timeout) {
                     break;
                 case KEY_PAUSE:
                     // simple pausing
-                    while (getch() != KEY_PAUSE) {}
+                    menu_pauseMenu();
                     break;
             }
         } else { // we timed out

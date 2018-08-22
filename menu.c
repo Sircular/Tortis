@@ -8,7 +8,9 @@
 
 #define CHOICE_STR "->"
 #define CLEAR_CHOICE_STR "  "
+#define PAUSE_STR "PAUSED"
 #define CHOICE_STR_LEN (sizeof(CHOICE_STR)-1)
+#define PAUSE_STR_LEN (sizeof(PAUSE_STR)-1)
 
 /* Creates a window centered in the terminal. */
 WINDOW* createCenteredWindow(int width, int height);
@@ -68,6 +70,20 @@ int menu_choice(char* title, int choiceCount, char** choices) {
     } else {
         return -1;
     }
+}
+
+void menu_pauseMenu() {
+    int winHeight = 3; // height of a line plus a padding
+    int winWidth = PAUSE_STR_LEN + 2;
+
+    WINDOW* pauseWin = createCenteredWindow(winHeight, winWidth);
+    mvwprintw(pauseWin, 1, 1, PAUSE_STR);
+    box(pauseWin, 0, 0);
+    wrefresh(pauseWin);
+
+    while (getch() != KEY_PAUSE) {}
+
+    delwin(pauseWin);
 }
 
 WINDOW* createCenteredWindow(int height, int width) {
