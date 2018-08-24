@@ -8,7 +8,7 @@
 
 #define CHOICE_STR "->"
 #define CLEAR_CHOICE_STR "  "
-#define PAUSE_STR "PAUSED"
+#define PAUSE_STR " PAUSED "
 #define CHOICE_STR_LEN (sizeof(CHOICE_STR)-1)
 #define PAUSE_STR_LEN (sizeof(PAUSE_STR)-1)
 
