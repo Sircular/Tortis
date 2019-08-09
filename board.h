@@ -55,7 +55,7 @@ void board_cementPiece(Board* boardPtr);
 
 /* Draws the board on the specified window at (0,0). Returns true on success.
  * */
-void board_draw(Board* boardPtr, WINDOW* subWin);
+void board_draw(Board* boardPtr, WINDOW* subWin, bool showProjection);
 
 /* Clears the board. */
 void board_clear(Board* boardPtr);

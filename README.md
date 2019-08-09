@@ -7,7 +7,8 @@ Tetris (i.e. not well.)
 ## Controls
 
 WASD keys move the piece (W rotates). Use Q for quick drop. Use enter to choose
-the active menu item.
+the active menu item. P pauses the game. R toggles whether a projection of where
+the piece will be is shown.
 
 ## Installation
 
@@ -17,6 +18,5 @@ simply run `make`. Then you can run it by running `./tortis`.
 ## Known Issues
 
 Rotation doesn't work like in the original Tetris games, so several strategies
-involving rotating a piece into place don't currently work. Quick drop is not
-implemented. Saving a block is not implemented. Needs more information on
-controls.
+involving rotating a piece into place don't currently work. Saving a block is
+not implemented. Needs more information on controls.

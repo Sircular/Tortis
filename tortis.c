@@ -57,6 +57,7 @@ static WINDOW* scoreWin;
 
 static GrabBag* grabBag;
 
+static bool showProjection = false;
 static bool isZen;
 
 /* Performs curses and game struct initialization. */
@@ -163,7 +164,7 @@ void initWindows() {
 }
 
 void redrawGame() {
-    board_draw(board, boardWin);
+    board_draw(board, boardWin, showProjection);
     wrefresh(gameWin);
     refresh();
 }
@@ -243,6 +244,9 @@ void dropBlock(long timeout) {
                     while (board_movePiece(board, 0, 1)){}
                     falling = false;
                     break;
+                case KEY_PROJECT:
+                    showProjection = !showProjection;
+                    break;
                 case KEY_PAUSE:
                     // simple pausing
                     menu_pauseMenu();
@@ -289,6 +293,6 @@ int showMainMenu() {
 }
 
 void redrawPreviewWindow() {
-    board_draw(previewBoard, previewWin);
+    board_draw(previewBoard, previewWin, false);
     scoreboard_draw(scoreboard, scoreWin);
 }

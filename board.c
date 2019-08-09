@@ -12,6 +12,9 @@ bool isPieceValid(Board* board, Piece piece);
 /* Draws a "chunk" on the board. */
 void drawChunk(WINDOW* subWin, int x, int y, int col);
 
+/* Draws a projection so down to where the piece will be */
+void drawProjection(WINDOW* subWin, int x, int y, int col);
+
 Board* board_init(int width, int height) {
     Board* boardPtr = malloc(sizeof(Board));
     if (boardPtr == NULL) {
@@ -103,7 +106,7 @@ void board_cementPiece(Board* boardPtr) {
     boardPtr->piece = NULL;
 }
 
-void board_draw(Board* boardPtr, WINDOW* subWin) {
+void board_draw(Board* boardPtr, WINDOW* subWin, bool showProjection) {
     if (boardPtr == NULL || subWin == NULL) {
         return;
     }
@@ -117,10 +120,27 @@ void board_draw(Board* boardPtr, WINDOW* subWin) {
             drawChunk(subWin, x, y, val);
         }
     }
+
+
     // draw the piece
     if (boardPtr->piece != NULL) {
         int i;
         Piece piece = *(boardPtr->piece);
+        // draw the projection to where the piece will be
+        if (showProjection) {
+            Piece projection = piece;
+            while (isPieceValid(boardPtr, projection) && piece.pos.y <= boardPtr->height) {
+                projection.pos.y++;
+            }
+            projection.pos.y--;
+            for (i = 0; i < BLOCKS_PER_PIECE; i++) {
+                Coordinate c = coordinate_add(projection.pos, projection.blocks[i]);
+                if (c.y > 0) {
+                    drawProjection(subWin, c.x, c.y, piece.type);
+                }
+            }
+        }
+
         for (i = 0; i < BLOCKS_PER_PIECE; i++) {
             Coordinate c = coordinate_add(piece.pos, piece.blocks[i]);
             if (c.y > 0) {
@@ -185,8 +205,15 @@ bool isPieceValid(Board* boardPtr, Piece piece) {
 }
 
 void drawChunk(WINDOW* subWin, int x, int y, int col) {
-    int attrs = (int)COLOR_PAIR(col);
+    attr_t attrs = COLOR_PAIR(col);
     wattron(subWin, attrs);
     mvwprintw(subWin, y+1, (x*2)+1, "  ");
+    wattroff(subWin, attrs);
+}
+
+void drawProjection(WINDOW* subWin, int x, int y, int col) {
+    attr_t attrs = COLOR_PAIR(col + 8);
+    wattron(subWin, attrs);
+    mvwprintw(subWin, y+1, (x*2)+1, "::");
     wattroff(subWin, attrs);
 }
