@@ -4,12 +4,13 @@ LIBS=-lncurses
 BIN=tortis
 
 SOURCES=$(wildcard *.c)
+HEADERS=$(wildcard *.h)
 OBJECTS=$(SOURCES:.c=.o)
 
 $(BIN): $(OBJECTS)
 	$(CC) $(CFLAGS) $(OBJECTS) $(LIBS) -o $(BIN)
 
-%.o: %.c
+%.o: %.c $(HEADERS)
 	$(CC) -c $(CFLAGS) $< -o $@
 
 clean:
