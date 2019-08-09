@@ -246,6 +246,13 @@ void dropBlock(long timeout) {
                 case KEY_PAUSE:
                     // simple pausing
                     menu_pauseMenu();
+                    // the board gets immediately redrawn, but these windows
+                    // might not
+                    redrawwin(scoreWin);
+                    wrefresh(scoreWin);
+                    redrawwin(previewWin);
+                    wrefresh(previewWin);
+                    refresh();
                     break;
             }
         } else { // we timed out
