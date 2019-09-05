@@ -101,7 +101,8 @@ void board_cementPiece(Board* boardPtr) {
     int i;
     for (i = 0; i < BLOCKS_PER_PIECE; i++) {
         Coordinate c = coordinate_add(piece.pos, piece.blocks[i]);
-        boardPtr->board[COORD_INDEX(boardPtr, c.x, c.y)] = piece.type;
+        boardPtr->board[COORD_INDEX(boardPtr, c.x, c.y)] =
+            (unsigned char)piece.type;
     }
     boardPtr->piece = NULL;
 }
@@ -136,7 +137,7 @@ void board_draw(Board* boardPtr, WINDOW* subWin, bool showProjection) {
             for (i = 0; i < BLOCKS_PER_PIECE; i++) {
                 Coordinate c = coordinate_add(projection.pos, projection.blocks[i]);
                 if (c.y > 0) {
-                    drawProjection(subWin, c.x, c.y, piece.type);
+                    drawProjection(subWin, c.x, c.y, (int)piece.type);
                 }
             }
         }
@@ -144,7 +145,7 @@ void board_draw(Board* boardPtr, WINDOW* subWin, bool showProjection) {
         for (i = 0; i < BLOCKS_PER_PIECE; i++) {
             Coordinate c = coordinate_add(piece.pos, piece.blocks[i]);
             if (c.y > 0) {
-                drawChunk(subWin, c.x, c.y, piece.type);
+                drawChunk(subWin, c.x, c.y, (int)piece.type);
             }
         }
     }
