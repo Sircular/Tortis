@@ -1,5 +1,5 @@
 CC=clang
-CFLAGS=-Weverything -Wno-padded
+CFLAGS=-Weverything -D_DEFAULT_SOURCE
 LIBS=-lncurses
 BIN=tortis
 
