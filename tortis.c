@@ -33,11 +33,12 @@
 #define CHOICE_ZEN  1
 #define CHOICE_EXIT 2
 
-#define TIMEOUT_COUNT 9
 static long TIMEOUTS[] = {
     1000000,
     750000,
+    620000,
     500000,
+    420000,
     350000,
     250000,
     200000,
@@ -45,6 +46,7 @@ static long TIMEOUTS[] = {
     100000,
     50000
 };
+static int TIMEOUT_COUNT = sizeof(TIMEOUTS)/sizeof(TIMEOUTS[0]);
 
 static Board* board;
 static Board* previewBoard;
@@ -184,7 +186,6 @@ void gameLoop() {
         dropBlock(timeout);
         // check if you lost, bruh
         if (board->piece->pos.y <= 0) {
-            // it's above the board
             running = false;
             break;
         }
@@ -194,10 +195,12 @@ void gameLoop() {
         int turnLinesCleared = 0;
         for (i = 0; i < board->height; i++) {
             if (board_isLineFull(board, i)) {
-                board_clearLine(board, i);
-                board_shiftLine(board, i);
+                board_setCleared(board, i);
                 turnLinesCleared++;
             }
+        }
+        if (turnLinesCleared > 0) {
+            board_clearLines(board, boardWin, MICROS_TO_SECONDS / 10, 3);
         }
         scoreboard_clearLines(scoreboard, turnLinesCleared);
     }

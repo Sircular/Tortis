@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <curses.h>
+#include <unistd.h>
 
 #include "board.h"
 #include "color.h"
@@ -8,6 +9,10 @@
 /* Returns if a piece in a particular position or rotation is valid on the
  * given board. */
 bool isPieceValid(Board* board, Piece piece);
+
+void board_drawBoard(Board* boardPtr, WINDOW* subWin);
+
+void board_shiftLine(Board* boardPtr, int line);
 
 /* Draws a "chunk" on the board. */
 void drawChunk(WINDOW* subWin, int x, int y, int col);
@@ -28,6 +33,7 @@ Board* board_init(int width, int height) {
         return NULL;
     }
     boardPtr->piece = NULL;
+    boardPtr->cleared = calloc((unsigned long)height, sizeof(bool));
     return boardPtr;
 }
 
@@ -35,6 +41,9 @@ void board_free(Board* boardPtr) {
     if (boardPtr != NULL) {
         if (boardPtr->board != NULL) {
             free(boardPtr->board);
+        }
+        if (boardPtr->cleared != NULL) {
+            free(boardPtr->cleared);
         }
         free(boardPtr);
     }
@@ -49,7 +58,14 @@ void board_setPiece(Board* boardPtr, enum PieceType type) {
     }
     piece_init(boardPtr->piece, type);
     boardPtr->piece->pos.x = boardPtr->width/2 - 1;
+}
 
+void board_setCleared(Board* boardPtr, int line) {
+    if (boardPtr == NULL || boardPtr->cleared == NULL ||
+            line > boardPtr->height) {
+        return;
+    }
+    boardPtr->cleared[line] = true;
 }
 
 bool board_isLineFull(Board* boardPtr, int line) {
@@ -111,18 +127,7 @@ void board_draw(Board* boardPtr, WINDOW* subWin, bool showProjection) {
     if (boardPtr == NULL || subWin == NULL) {
         return;
     }
-    box(subWin, 0, 0);
-    int x;
-    for (x = 0; x < boardPtr->width; x++) {
-        int y;
-        for (y = 0; y < boardPtr->height; y++) {
-            int i = COORD_INDEX(boardPtr, x, y);
-            unsigned char val = boardPtr->board[i];
-            drawChunk(subWin, x, y, val);
-        }
-    }
-
-
+    board_drawBoard(boardPtr, subWin);
     // draw the piece
     if (boardPtr->piece != NULL) {
         int i;
@@ -153,13 +158,52 @@ void board_draw(Board* boardPtr, WINDOW* subWin, bool showProjection) {
     wrefresh(subWin);
 }
 
-void board_clearLine(Board* boardPtr, int line) {
-    if (boardPtr == NULL || line < 0 || line >= boardPtr->height) {
+void board_clearLines(Board* boardPtr, WINDOW* subWin, unsigned int delay, int count) {
+    if (boardPtr == NULL || subWin == NULL) {
         return;
     }
-    int i;
-    for (i = 0; i < boardPtr->width; i++) {
-        boardPtr->board[COORD_INDEX(boardPtr, i, line)] = 0;
+
+    /* double count so we can use the mod 2 trick */
+    count *= 2;
+
+    int x, y;
+    for (; count > 0; count--) {
+        board_drawBoard(boardPtr, subWin);
+        if (count % 2 == 0)
+        {
+            for (y = 0; y < boardPtr->height; y++) {
+                if (boardPtr->cleared[y]){
+                    for (x = 0; x < boardPtr->width; x++) {
+                        drawChunk(subWin, x, y, COLOR_BLACK);
+                    }
+                }
+            }
+        }
+        touchwin(subWin);
+        wrefresh(subWin);
+        usleep(delay);
+    }
+
+    for (y = 0; y < boardPtr->height; y++) {
+        if (boardPtr->cleared[y]) {
+            board_shiftLine(boardPtr, y);
+            boardPtr->cleared[y] = false;
+        }
+    }
+    board_drawBoard(boardPtr, subWin);
+    touchwin(subWin);
+    wrefresh(subWin);
+}
+
+void board_drawBoard(Board* boardPtr, WINDOW* subWin) {
+    box(subWin, 0, 0);
+    int x, y;
+    for (y = 0; y < boardPtr->height; y++) {
+        for (x = 0; x < boardPtr->width; x++) {
+            int i = COORD_INDEX(boardPtr, x, y);
+            unsigned char val = boardPtr->board[i];
+            drawChunk(subWin, x, y, val);
+        }
     }
 }
 

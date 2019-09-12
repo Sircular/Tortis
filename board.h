@@ -18,6 +18,7 @@ typedef struct Board {
     int height;
     unsigned char* board;
     Piece* piece;
+    bool *cleared;
 } Board;
 
 /* Gets the index from the x and y coordinates based on width. */
@@ -36,10 +37,7 @@ void board_setPiece(Board* boardPtr, enum PieceType type);
 bool board_isLineFull(Board* boardPtr, int line);
 
 /* Clears a line on the board. (Note: does not shift down after clearing. */
-void board_clearLine(Board* boardPtr, int line);
-
-/* Shifts the given line down, filling the top row with empty blocks. */
-void board_shiftLine(Board* boardPtr, int line);
+void board_setCleared(Board* boardPtr, int line);
 
 /* Attempts to move the piece by the specified coordinates. Returns true if it
  * is a valid move. */
@@ -53,9 +51,12 @@ bool board_rotatePiece(Board* boardPtr, bool counter);
  * lowest point. */
 void board_cementPiece(Board* boardPtr);
 
-/* Draws the board on the specified window at (0,0). Returns true on success.
- * */
+/* Draws the board on the specified window at (0,0). Returns true on success. */
 void board_draw(Board* boardPtr, WINDOW* subWin, bool showProjection);
+
+/* Draw the board with recently cleared lines flashing. Clears and shifts those
+ * lines afterwards. */
+void board_clearLines(Board* boardPtr, WINDOW* subWin, unsigned int delay, int count);
 
 /* Clears the board. */
 void board_clear(Board* boardPtr);
